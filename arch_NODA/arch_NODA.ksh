@@ -22,7 +22,7 @@ ARCDIR="$STMP/archive/$PSLOT"
 ATARDIR0="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS"
 ATARDIR1="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/$PSLOT"
 FHMIN_GFS=0
-FHMAX_GFS_00=180
+FHMAX_GFS_00=168
 FHMAX_GFS_06=120
 FHMAX_GFS_12=120
 FHMAX_GFS_18=120
@@ -32,7 +32,7 @@ TESTLOGS='.false.'
 
 # Definition of how I will archive my data on HPSS:
 #/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_NAMv4/nwrw_019/rh2015/201510/20151030
-cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/fv3gfs-setup-exp/arch_NODA
+cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/fv3gfs-setup-exp/arch_${PSLOT}
 #(( offset=($CDATE - $SDATE)/100 )) #calculate the day offset of CDATE from SDATE.
 (( FH=$FHOUT_GFS + $offset*24 ))   #if offest is >0 add 24 for each day it is offset.
 typeset -Z3 FH
@@ -72,22 +72,23 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
 
 done
 if [[ $TESTLOGS == '.false.' ]]; then #now sort the data into respective dirs
-   ATMDIR=gfs.t00z.$PDY.atm.nemsio
+   ATMDIR=gfs.t${CYC}z.$PDY.atm.nemsio
+
    mkdir $ATMDIR 
    mv gfs.t${CYC}z.atmf*.nemsio $ATMDIR
    htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR 
 
-   SFCDIR=gfs.t00z.$PDY.sfc.nemsio
+   SFCDIR=gfs.t${CYC}z.$PDY.sfc.nemsio
    mkdir $SFCDIR 
    mv gfs.t${CYC}z.sfcf*.nemsio $SFCDIR
    htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR 
 
-   LOGDIR=gfs.t00z.$PDY.log.nemsio
+   LOGDIR=gfs.t${CYC}z.$PDY.log.nemsio
    mkdir $LOGDIR 
    mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
    htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
 else
-   LOGDIR=gfs.t00z.$PDY.log.nemsio
+   LOGDIR=gfs.t${CYC}z.$PDY.log.nemsio
    mkdir $LOGDIR 
    mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
    htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 

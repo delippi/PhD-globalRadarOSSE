@@ -12,10 +12,11 @@ set -x
 
 CDATE=2018091100
 EDATE=2018091800
-PSLOT="NEXRAD-${CDATE}-${EDATE}"
+EXP="NEXRAD"
+PSLOT="${EXP}-${CDATE}-${EDATE}"
 
 HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/FV3ICS"
-ICSDIR="/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$CDATE/FV3ICS/$PSLOT/"
+ICSDIR="/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$CDATE/FV3ICS.getics/"
 
 mkdir -p $ICSDIR
 cd $ICSDIR

@@ -9,7 +9,7 @@ NENS=80
 GFS_CYC=4 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
 fv3gfs="fv3gfs-20181022"
 fcst_only=".false."
-
+set -x
 machine=`hostname | cut -c 1`
 if   [[ $machine == 'l' || $machine == 's' ]]; then #LUNA or SURGE
    DIR=/gpfs/hps3/emc/meso/save/${USER}/${fv3gfs}/ush
@@ -78,7 +78,7 @@ read ans
 if [[ $ans == 'y' ]]; then
    cd $mesosave/${fv3gfs}/sorc
    ./build_gsi.sh
-   ./link_fv3gfs.sh emc theia
+   ./link_fv3gfs.sh emc cray 
    cd -
 fi
 
@@ -100,7 +100,7 @@ rocotorun    -w $XML -d $DB
 
 EOF
 
-mv run.ksh $EXPDIR/$PSLOT
+mv run.ksh $EXPDIR/$PSLOT/.
 fi
 
 

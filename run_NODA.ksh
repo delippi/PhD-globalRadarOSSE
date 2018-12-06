@@ -78,7 +78,7 @@ read ans
 if [[ $ans == 'y' ]]; then
    cd $mesosave/${fv3gfs}/sorc
    ./build_gsi.sh
-   ./link_fv3gfs.sh emc theia
+   ./link_fv3gfs.sh emc cray 
    cd -
 fi
 

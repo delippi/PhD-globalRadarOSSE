@@ -19,9 +19,10 @@ PSLOT="NATURE-${SDATE}-${EDATE}"
 ROTDIR="/gpfs/hps2/ptmp/Donald.E.Lippi/fv3gfs_dl2rw/${SDATE}/$PSLOT"
 STMP="/gpfs/hps2/stmp/$USER/"
 ARCDIR="$STMP/archive/$PSLOT"
-ATARDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/$PSLOT"
+ATARDIR0="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS"
+ATARDIR1="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/$PSLOT"
 FHMIN_GFS=0
-FHMAX_GFS_00=180
+FHMAX_GFS_00=168
 FHMAX_GFS_06=120
 FHMAX_GFS_12=120
 FHMAX_GFS_18=120
@@ -39,8 +40,8 @@ typeset -Z3 FH
 PDY0=`echo $SDATE | cut -c 1-8`
 PDY=`echo  $CDATE | cut -c 1-8`
 CYC=`echo  $CDATE | cut -c 9-10`
-echo $FH $PDY0 $PDY $CYC
-
+echo $ATARDIR
+echo $ARCDIR
 (( offset_low=$offset*24 ))
 (( offset_high=($offset+1)*24 ))
 
@@ -57,7 +58,7 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
       cd $ARCDIR
       mkdir -p rh${valyr}/${valyrmon}/${valpdy}
       cd rh${valyr}/${valyrmon}/${valpdy} 
-      hsi "cd $ATARDIR/..; mkdir -P $PSLOT/rh${valyr}/${valyrmon}/${valpdy}"
+      hsi "cd $ATARDIR0; mkdir -p $PSLOT/rh${valyr}/${valyrmon}/${valpdy}"
    fi
    if [[ $TESTLOGS  == '.false.' ]]; then # these get moved at a later step
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio .
@@ -74,22 +75,22 @@ if [[ $TESTLOGS == '.false.' ]]; then #now sort the data into respective dirs
    ATMDIR=gfs.t00z.$PDY.atm.nemsio
    mkdir $ATMDIR 
    mv gfs.t${CYC}z.atmf*.nemsio $ATMDIR
-   htar -cvf $ATARDIR/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR 
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR 
 
    SFCDIR=gfs.t00z.$PDY.sfc.nemsio
    mkdir $SFCDIR 
    mv gfs.t${CYC}z.sfcf*.nemsio $SFCDIR
-   htar -cvf $ATARDIR/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR 
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR 
 
    LOGDIR=gfs.t00z.$PDY.log.nemsio
    mkdir $LOGDIR 
    mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
-   htar -cvf $ATARDIR/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
 else
    LOGDIR=gfs.t00z.$PDY.log.nemsio
    mkdir $LOGDIR 
    mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
-   htar -cvf $ATARDIR/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
 fi
 
 
