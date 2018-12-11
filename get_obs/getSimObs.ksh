@@ -6,6 +6,7 @@ PDY=20180911
 CYC=06
 valtime=${PDY}${CYC}
 cycles=28 #how many cycles? 1=06z; 2=06z,12z; 3=06z,12z,18z; etc.
+network="nexrad"
 
 
 
@@ -17,7 +18,7 @@ while [[ $cycle -le  $cycles ]]; do
 
    HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/obs"
    #2018091106_fv3.t06z_drw.bufr
-   obs=${valtime}_fv3.t${valcyc}z_drw.bufr
+   obs=${network}_${valtime}_fv3.t${valcyc}z_drw.bufr
 
    echo ""
    echo ${obs}
