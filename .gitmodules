@@ -1,14 +1,16 @@
 [submodule "drwsim"]
 	path = drwsim
 	url = git@github.com:delippi/drwsim.git
+	branch = radar_osse
 [submodule "py-ncepbufr"]
 	path = py-ncepbufr
 	url = git@github.com:delippi/py-ncepbufr.git
+	branch = radar_osse
 [submodule "rwfits"]
 	path = rwfits
 	url = git@github.com:delippi/rwfits.git
+	branch = radar_osse
 [submodule "py-fv3graphics"]
 	path = py-fv3graphics
 	url = git@github.com:delippi/py-fv3graphics.git
-[submodule]
-	drwsim = radar_osse
+	branch = radar_osse
