@@ -7,3 +7,6 @@
 [submodule "rwfits"]
 	path = rwfits
 	url = git@github.com:delippi/rwfits.git
+[submodule "py-fv3graphics"]
+	path = py-fv3graphics
+	url = git@github.com:delippi/py-fv3graphics.git
