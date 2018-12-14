@@ -1,0 +1,3 @@
+[submodule "drwsim"]
+	path = drwsim
+	url = git@github.com:delippi/drwsim.git
