@@ -1,3 +1,9 @@
 [submodule "drwsim"]
 	path = drwsim
 	url = git@github.com:delippi/drwsim.git
+[submodule "py-ncepbufr"]
+	path = py-ncepbufr
+	url = git@github.com:delippi/py-ncepbufr.git
+[submodule "rwfits"]
+	path = rwfits
+	url = git@github.com:delippi/rwfits.git
