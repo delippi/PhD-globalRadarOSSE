@@ -1,6 +1,10 @@
 #!/bin/ksh
 
-cd /scratch4/NCEPDEV/stmp3/Donald.E.Lippi/fv3gfs_dl2rw
+#cd /scratch4/NCEPDEV/stmp3/Donald.E.Lippi/fv3gfs_dl2rw
+#pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/py-fv3graphics"
+cd /scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/PhD-globalRadarOSSE/make_plots
+pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/PhD-globalRadarOSSE/py-fv3graphics"
+set -x
 
 EXPS="NATURE NODA NEXRAD"
 cycs="00     00   06"
@@ -22,12 +26,12 @@ FHEND=00
 
 pull_or_plot="plot" #options: pull, plot
 diff=".false."
+field="delz"
 
 set -A EXPS $EXPS 
 set -A cycs $cycs
 typeset -Z2 cyc
 
-pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/py-fv3graphics"
 
 i=0
 while [[ $i -lt ${#EXPS[@]} ]]; do
@@ -46,6 +50,7 @@ while [[ $i -lt ${#EXPS[@]} ]]; do
    sed -i "s/@FHSTART@/$FHSTART/g" make_plots_${EXP}.ksh
    sed -i     "s/@FHEND@/$FHEND/g" make_plots_${EXP}.ksh
    sed -i       "s/@diff@/$diff/g" make_plots_${EXP}.ksh
+   sed -i     "s/@field@/$field/g" make_plots_${EXP}.ksh
 #   sed -i "s/@@//g" make_plots_${EXP}.ksh
 
    cp -p make_plots.ksh pull_fcst_${EXP}.ksh
@@ -57,6 +62,7 @@ while [[ $i -lt ${#EXPS[@]} ]]; do
    sed -i "s/@FHSTART@/$FHSTART/g" pull_fcst_${EXP}.ksh
    sed -i     "s/@FHEND@/$FHEND/g" pull_fcst_${EXP}.ksh
    sed -i       "s/@diff@/$diff/g" pull_fcst_${EXP}.ksh
+   sed -i     "s/@field@/$field/g" make_fcst_${EXP}.ksh
 #   sed -i "s/@@//g" pull_fcst_${EXP}.ksh
 
    cp -p ${pyfv3graphics}/threaded_fv3_2d_template_fcstonly.py ${pyfv3graphics}/threaded_fv3_2d_${EXP}.py

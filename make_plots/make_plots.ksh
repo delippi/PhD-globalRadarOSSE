@@ -25,7 +25,8 @@ mon=`echo  $pdy | cut -c 5-6`
 yrmon=${year}${mon}
 NWORK="/scratch4/NCEPDEV/stmp3/Donald.E.Lippi/fv3gfs_dl2rw/${npdy}${ncyc}/NATURE-${DATES}/"
 WORK="/scratch4/NCEPDEV/stmp3/Donald.E.Lippi/fv3gfs_dl2rw/${pdy}${cyc}/${EXP}-${DATES}/"
-pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/py-fv3graphics"
+#pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/py-fv3graphics"
+pyfv3graphics="/scratch4/NCEPDEV/fv3-cam/save/Donald.E.Lippi/PhD-globalRadarOSSE/py-fv3graphics/"
 FIGS="figs"
 
 #SETUP COUNTERS
@@ -136,12 +137,12 @@ while [[ $FH -le $FHEND ]]; do
       fi
 
       #CREATE THE PLOT NOW IF NOT ALREADY DONE
-      field="dbz"
-      if [[ $diff == ".true." ]]; then
-         FIG0="gfs.t${cyc}z.${pdy}${cyc}_v${valpdy}${valcyc}_atmf${FH}_${field}_againstTruth.png"
-      else
+      field="@field@"
+#      if [[ $diff == ".true." ]]; then
+#         FIG0="gfs.t${cyc}z.${pdy}${cyc}_v${valpdy}${valcyc}_atmf${FH}_${field}_againstTruth.png"
+#      else
          FIG0="gfs.t${cyc}z.${pdy}${cyc}_v${valpdy}${valcyc}_atmf${FH}_${field}.png"
-      fi
+#      fi
       FIG1="${EXP}_${FIG0}"
       if [[ ! -e ./${FIGS}/${FIG1}_blah ]]; then 
          cd $WORK
@@ -155,6 +156,7 @@ while [[ $FH -le $FHEND ]]; do
          else
             python ${pyfv3graphics}/threaded_fv3_2d_${EXP}.py $input 
          fi
+         echo "$datadir/${FIG0} ./${FIG1}"
          mv $datadir/${FIG0} ./${FIG1}
          cd $WORK
       fi
@@ -163,3 +165,4 @@ while [[ $FH -le $FHEND ]]; do
    (( NFH=$NFH+$FHINC ))
 done
 
+echo "cd $WORK"
