@@ -1,6 +1,7 @@
 [submodule "drwsim"]
 	path = drwsim
 	url = git@github.com:delippi/drwsim.git
+        branch = radar_osse
 [submodule "py-ncepbufr"]
 	path = py-ncepbufr
 	url = git@github.com:delippi/py-ncepbufr.git
