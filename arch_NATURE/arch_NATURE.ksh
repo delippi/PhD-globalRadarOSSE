@@ -11,6 +11,8 @@ set -x
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
 #######  USER INPUT   ####################################
+copy_files=@copy_files@
+archive_files=@archive_files@
 SDATE=2018091100
 EDATE=2018091800
 CDATE=@CDATE@
@@ -27,12 +29,12 @@ FHMAX_GFS_06=120
 FHMAX_GFS_12=120
 FHMAX_GFS_18=120
 FHOUT_GFS=1
-TESTLOGS='.false.'
 ##########################################################
 
 # Definition of how I will archive my data on HPSS:
 #/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_NAMv4/nwrw_019/rh2015/201510/20151030
-cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/fv3gfs-setup-exp/arch_NATURE
+cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/arch_NATURE
+mkdir -p $STMP
 #(( offset=($CDATE - $SDATE)/100 )) #calculate the day offset of CDATE from SDATE.
 (( FH=$FHOUT_GFS + $offset*24 ))   #if offest is >0 add 24 for each day it is offset.
 typeset -Z3 FH
@@ -44,6 +46,11 @@ echo $ATARDIR
 echo $ARCDIR
 (( offset_low=$offset*24 ))
 (( offset_high=($offset+1)*24 ))
+
+MASTER=gfs.t${CYC}z.$PDY.master.grb2
+GB0p25=gfs.t${CYC}z.$PDY.pgrb2.0p25
+ATMDIR=gfs.t${CYC}z.$PDY.atm.nemsio
+SFCDIR=gfs.t${CYC}z.$PDY.sfc.nemsio
 
 while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
    valtime=`${ndate} +${FH} ${PDY0}${CYC}`
@@ -59,39 +66,32 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
       mkdir -p rh${valyr}/${valyrmon}/${valpdy}
       cd rh${valyr}/${valyrmon}/${valpdy} 
       hsi "cd $ATARDIR0; mkdir -p $PSLOT/rh${valyr}/${valyrmon}/${valpdy}"
+      mkdir -p $MASTER
+      mkdir -p $GB0p25 
+      mkdir -p $ATMDIR
+      mkdir -p $SFCDIR
    fi
-   if [[ $TESTLOGS  == '.false.' ]]; then # these get moved at a later step
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio .
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio .
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.logf${FH}.nemsio .
-   else
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.logf${FH}.nemsio .
-   fi 
-   echo $valtime
+   if [[ $copy_files == "YES" ]]; then
+      #TRY USING RSYNC INSTEAD OF CP IN THE FUTURE.
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH}  ./$MASTER
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2if${FH} ./$MASTER
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2b.0p25.f${FH} ./$GB0p25
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio ./$ATMDIR
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR
+      echo $valtime
+   fi
    (( FH=FH+1 ))
-
 done
-if [[ $TESTLOGS == '.false.' ]]; then #now sort the data into respective dirs
-   ATMDIR=gfs.t00z.$PDY.atm.nemsio
-   mkdir $ATMDIR 
-   mv gfs.t${CYC}z.atmf*.nemsio $ATMDIR
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR 
 
-   SFCDIR=gfs.t00z.$PDY.sfc.nemsio
-   mkdir $SFCDIR 
-   mv gfs.t${CYC}z.sfcf*.nemsio $SFCDIR
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR 
+if [[ $archive_files == "YES" ]]; then
+   #now sort the data into respective dirs
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${MASTER}.tar $MASTER
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${GB0p25}.tar $GB0p25
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR
 
-   LOGDIR=gfs.t00z.$PDY.log.nemsio
-   mkdir $LOGDIR 
-   mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
-else
-   LOGDIR=gfs.t00z.$PDY.log.nemsio
-   mkdir $LOGDIR 
-   mv gfs.t${CYC}z.logf*.nemsio $LOGDIR
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${LOGDIR}.tar $LOGDIR 
 fi
 
 
-
+echo "Successfully completed"
+exit 0
