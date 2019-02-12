@@ -12,7 +12,7 @@ set -x
 
 CDATE=2018091100
 EDATE=2018091800
-EXP="NEXRAD"
+EXP="NODA" #NEXRAD and NODA
 PSLOT="${EXP}-${CDATE}-${EDATE}"
 
 HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/FV3ICS"
@@ -20,5 +20,6 @@ ICSDIR="/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$CDATE/FV3ICS.getics/"
 
 mkdir -p $ICSDIR
 cd $ICSDIR
-htar -xvf ${HPSSDIR}/${PSLOT}.tar
+#htar -xvf ${HPSSDIR}/${PSLOT}.tar
+htar -tvf ${HPSSDIR}/${PSLOT}.tar
 
