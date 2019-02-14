@@ -2,7 +2,7 @@
 #BSUB -P FV3GFS-T2O
 #BSUB -J gfsarch.t@CYC@z.@CDATE@
 #BSUB -W 06:00                    # wall-clock time (hrs:mins)
-#BSUB -n 10                        # number of tasks in job
+#BSUB -n 24                        # number of tasks in job
 #BSUB -R "rusage[mem=8192]"       # number of cores
 #BSUB -q "dev_transfer"           # queue
 #BSUB -o gfsarch.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
@@ -83,9 +83,6 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR/. &   ; job5=$1
       #wait $job1 $job2 $job3 $job4 $job5
       wait $job1 $job2 $job3 $job5 #don't wait on the nemsio atm file
-      if [[ $FH%24 == 0 ]]; then
-         wait #every 24th iteration wait for ATMDIR to copy. Don't want to spawn too many processes.
-      fi
    fi
 
    echo $valtime
