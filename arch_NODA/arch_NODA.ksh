@@ -83,8 +83,8 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high ]]; do
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR/. &   ; job5=$1
       #wait $job1 $job2 $job3 $job4 $job5
       wait $job1 $job2 $job3 $job5 #don't wait on the nemsio atm file
-      if [[ $FH%12 == 0 ]]; then
-         wait #every 12th iteration wait for ATMDIR to copy. Don't want to spawn too many processes.
+      if [[ $FH%24 == 0 ]]; then
+         wait #every 24th iteration wait for ATMDIR to copy. Don't want to spawn too many processes.
       fi
    fi
 
@@ -104,16 +104,10 @@ fi
 
 
 if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${MASTER}.tar $MASTER & ; job1=$!
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${GB0p25}.tar $GB0p25 & ; job2=$!
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR & ; job3=$!
-   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR & ; job4=$!
-   #wait $job1 $job2 $job3 $job4
-   wait $job1 $job2 $job4 #don't wait on the nemsio atm file
-   if [[ $FH%12 == 0 ]]; then
-      wait #every 12th iteration wait for ATMDIR to copy. Don't want to spawn too many processes.
-   fi
-
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${MASTER}.tar $MASTER &
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${GB0p25}.tar $GB0p25 &
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${ATMDIR}.tar $ATMDIR &
+   htar -cvf $ATARDIR1/rh${valyr}/${valyrmon}/${valpdy}/${SFCDIR}.tar $SFCDIR &
 fi
 
 
