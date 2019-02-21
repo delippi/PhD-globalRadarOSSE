@@ -112,7 +112,7 @@ htar -xvf ${HPSSDIR}/${PSLOT}.tar ${PSLOT}/gdas.${PDY}/
 EOF
 
 if [[ 1 -eq 1 ]]; then
-   bsub < get_ics.ksh.improved.mem$min-$max
+   bsub < get_ics.ksh.improved.control
 fi
 
 #htar -xvf ${HPSSDIR}/${PSLOT}.tar ${PSLOT}/gdas.${PDY}/
