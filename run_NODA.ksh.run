@@ -7,7 +7,7 @@ RES_DET=768 #768 #384
 RES_ENS=384 #384 #192
 NENS=80
 GFS_CYC=4 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
-fv3gfs="fv3gfs-20181022"
+fv3gfs="global-workflow-20190226"
 fcst_only=".false."
 set -x
 machine=`hostname | cut -c 1`

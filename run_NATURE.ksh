@@ -1,11 +1,11 @@
 #!/bin/ksh
 
-CDATE=2018091100
-EDATE=2018091800
+CDATE=2019021900
+EDATE=2019030100 #spinup time + 7days + 7days
 PSLOT="NATURE-${CDATE}-${EDATE}"
 RES=768 #768=13km #384=26km
 GFS_CYC=1 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
-fv3gfs="fv3gfs-20181022"
+fv3gfs="global-workflow-20190226"
 
 
 machine=`hostname | cut -c 1`
@@ -58,7 +58,7 @@ read ans
 if [[ $ans == 'y' ]]; then
 cat << 'EOF' > run.ksh
 #!/bin/ksh
-fv3gfs="fv3gfs-20181022"
+fv3gfs="global-workflow-20190226"
 #What machine are we on?
 machine=`hostname | cut -c 1`
 if [[ $machine == 'l' || $machine == 's' ]]; then #LUNA
@@ -79,8 +79,8 @@ if [[ $ans == 'y' ]]; then
    cd -
 fi
 
-CDATE=2018091100
-EDATE=2018091800
+CDATE=2019021900
+EDATE=2019030100
 PSLOT="NATURE-${CDATE}-${EDATE}"
 EXPDIR=$mesonoscrub/fv3gfs_dl2rw/$CDATE/
 
@@ -88,8 +88,8 @@ $mesosave/${fv3gfs}/ush/rocoto/setup_workflow_fcstonly.py --expdir $EXPDIR/$PSLO
 
 XML=${PSLOT}.xml
 DB=${PSLOT}.db
-DATE=201809110000
-TASK="gfsanal"
+#DATE=201809110000
+#TASK="gfsanal"
 
 #rocotorewind -w $XML -d $DB -c $DATE -t $TASK
 rocotorun    -w $XML -d $DB
