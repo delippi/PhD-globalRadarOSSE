@@ -10,7 +10,9 @@
 # This script downloads initial conditions from HPSS for global radar wind assimilation experiments.
 #set -x
 
-groups_of=10 #how to group the archive read. groups of 10 would have 8 jobs for 80 members plus one for the control
+#how to groupd the archive jobs.
+groups_of=10 #groups of 10 would have  8 jobs for 80 members plus one for the ctl - 13:12 min
+groups_of=4  #groups of  4 would have 20 jobs for 80 members plus one for the ctl -  6:42 min
 CDATE=2018091100
 EDATE=2018091800
 EXP="NODA" #NEXRAD and NODA
@@ -28,7 +30,8 @@ typeset -Z3 max
 typeset -Z3 min
 
 #ENSEMBLE
-while [[ $memgroup -le 8   ]]; do
+(( maxjobs=80/$groups_of ))
+while [[ $memgroup -le $maxjobs   ]]; do
 
 (( max= memgroup*groups_of ))
 (( min= (memgroup-1)*groups_of+1 ))

@@ -1,9 +1,9 @@
 #!/bin/ksh
 
 CDATE=2018091100
-EDATE=2018092300
-PSLOT="NATURE-${CDATE}-${EDATE}"
-RES_DET=768 #768 #384
+EDATE=2018091800
+PSLOT="FreeRunLow3-${CDATE}-${EDATE}"
+RES_DET=384 #768 #384
 RES_ENS=384 #384 #192
 NENS=80
 GFS_CYC=4 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
@@ -83,8 +83,8 @@ if [[ \$ans == 'y' ]]; then
 fi
 
 CDATE=2018091100
-EDATE=2018092300
-PSLOT="NATURE-\${CDATE}-\${EDATE}"
+EDATE=2018091800
+PSLOT="FreeRunLow3-\${CDATE}-\${EDATE}"
 EXPDIR=\$mesonoscrub/fv3gfs_dl2rw/\$CDATE/
 
 \$mesosave/\${fv3gfs}/ush/rocoto/setup_workflow.py --expdir \$EXPDIR/\$PSLOT/
