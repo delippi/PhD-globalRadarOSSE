@@ -2,7 +2,7 @@
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
 pdy=20180923 #forecast pdy (begninning date)
-cyc=00       #forecast cycle
+cyc=06       #forecast cycle
 FHMAX=168  #length of forecast in hours
 group=1
 debug="NO"
@@ -18,12 +18,12 @@ offset=0
 #The next two lines are meant to break the task of copying files to a temp dir
 #and then archiving them since there is so much data and the wall time will
 #likely be >6hrs
-copy_files="YES"
-archive_files="NO"
+copy_files="NO"
+archive_files="YES"
 
 cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/arch_NODA
 
-script_base="arch_NODA"
+script_base="arch_NODA_nemsio"
 
 while [ $CDATE -le $EDATE ]; do
       cp -p $script_base.ksh $script_base.t${cyc}z.$pdy.group$group.ksh

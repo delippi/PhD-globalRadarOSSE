@@ -1,11 +1,11 @@
 #!/bin/ksh
 #BSUB -P FV3GFS-T2O
-#BSUB -J gfsarch.t@CYC@z.@CDATE@
+#BSUB -J gfsarch_other.t@CYC@z.@CDATE@
 #BSUB -W 06:00                    # wall-clock time (hrs:mins)
 #BSUB -n 10                        # number of tasks in job
 #BSUB -R "rusage[mem=8192]"       # number of cores
 #BSUB -q "dev_transfer"           # queue
-#BSUB -o gfsarch.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
+#BSUB -o gfsarch_other.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
 
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
@@ -54,10 +54,10 @@ valyr0=`echo $valtime0    | cut -c 1-4`
 
 MASTER=gfs.t${CYC}z.$PDY0.master.grb2
 GB0p25=gfs.t${CYC}z.$PDY0.pgrb2.0p25
-ATMDIR=gfs.t${CYC}z.$PDY0.atm.nemsio
 SFCDIR=gfs.t${CYC}z.$PDY0.sfc.nemsio
 
 create_paths="YES"
+
 
 while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
    valtime=`${ndate} +${FH} ${PDY0}${CYC}`
@@ -84,7 +84,6 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
       fi
       mkdir -p $MASTER
       mkdir -p $GB0p25
-      mkdir -p $ATMDIR
       mkdir -p $SFCDIR
    fi
 
@@ -92,8 +91,8 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH}  ./$MASTER/. & ; job1=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2if${FH} ./$MASTER/. & ; job2=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2b.0p25.f${FH} ./$GB0p25/. & ; job3=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio ./$ATMDIR/. &   ; job4=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR/. &   ; job5=$!
+
       #wait $job1 $job2 $job3 $job4 $job5
       wait $job1 $job2 $job3 $job5 #don't wait on the nemsio atm file
    fi
@@ -113,11 +112,10 @@ done
 
 
 if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs
-   htar -cvf $ATARDIR1/${PATHx}/${MASTER}.tar $MASTER &
-   htar -cvf $ATARDIR1/${PATHx}/${GB0p25}.tar $GB0p25 &
-   htar -cvf $ATARDIR1/${PATHx}/${ATMDIR}.tar $ATMDIR & ; job1=$!
-   htar -cvf $ATARDIR1/${PATHx}/${SFCDIR}.tar $SFCDIR &
-   wait $job1
+   htar -cvf $ATARDIR1/${PATHx}/${MASTER}.tar $MASTER & ; job1=$!
+   htar -cvf $ATARDIR1/${PATHx}/${GB0p25}.tar $GB0p25 & ; job2=$!
+   htar -cvf $ATARDIR1/${PATHx}/${SFCDIR}.tar $SFCDIR & ; job4=$!
+   wait $job1 $job2 $job4
 fi
 
 

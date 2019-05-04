@@ -23,7 +23,7 @@ archive_files="NO"
 
 cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/arch_NODA
 
-script_base="arch_NODA"
+script_base="arch_NODA_other"
 
 while [ $CDATE -le $EDATE ]; do
       cp -p $script_base.ksh $script_base.t${cyc}z.$pdy.group$group.ksh
