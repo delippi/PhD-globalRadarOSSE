@@ -1,8 +1,11 @@
-#!/bin/ksh
+#!/bin/ksh -x
+
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
-pdy=20180923 #forecast pdy (begninning date)
-cyc=00       #forecast cycle
+#pdy=20180923 #forecast pdy (begninning date)
+#cyc=00       #forecast cycle
+pdy=$PDY
+cyc=$cyc
 FHMAX=168  #length of forecast in hours
 group=1
 debug="NO"
@@ -43,12 +46,14 @@ while [ $CDATE -le $EDATE ]; do
       sed -i                 "s/@FHMAX@/$FHMAX/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@debug@/$debug/g" $script_base.t${cyc}z.$pdy.group$group.ksh
 
-      if [[ $debug == "NO" ]]; then
-         bsub < $script_base.t${cyc}z.$pdy.group$group.ksh
-      elif [[ $debug == "YES" ]]; then
-         ksh $script_base.t${cyc}z.$pdy.group$group.ksh
-      fi
+#      if [[ $debug == "NO" ]]; then
+#         bsub < $script_base.t${cyc}z.$pdy.group$group.ksh
+#      elif [[ $debug == "YES" ]]; then
+#         ksh $script_base.t${cyc}z.$pdy.group$group.ksh
+#      fi
       CDATE=`${ndate} +24 $CDATE` #increment by 24 hours
       (( offset=offset+1 )) #increment by 1 day
       (( group=group+1 )) #increment group number
 done
+
+exit 0
