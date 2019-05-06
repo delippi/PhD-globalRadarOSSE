@@ -1,11 +1,11 @@
 #!/bin/ksh
 #BSUB -P FV3GFS-T2O
-#BSUB -J gfsarch.t@CYC@z.@CDATE@
+#BSUB -J gfs@copyarch@.t@CYC@z.@CDATE@
 #BSUB -W 06:00                    # wall-clock time (hrs:mins)
 #BSUB -n 10                        # number of tasks in job
 #BSUB -R "rusage[mem=8192]"       # number of cores
 #BSUB -q "dev_transfer"           # queue
-#BSUB -o gfsarch.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
+#BSUB -o gfs@copyarch@.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
 
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
@@ -90,12 +90,10 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
 
    if [[ $copy_files == "YES" && $debug == "NO" ]]; then # these get moved at a later step
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH}  ./$MASTER/. & ; job1=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2if${FH} ./$MASTER/. & ; job2=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2b.0p25.f${FH} ./$GB0p25/. & ; job3=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio ./$ATMDIR/. &   ; job4=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR/. &   ; job5=$!
-      #wait $job1 $job2 $job3 $job4 $job5
-      wait $job1 $job2 $job3 $job5 #don't wait on the nemsio atm file
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2b.0p25.f${FH} ./$GB0p25/. & ; job2=$!
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio ./$ATMDIR/. &   ; job3=$!
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio ./$SFCDIR/. &   ; job4=$!
+      wait $job1 $job2 $job4 #don't wait on the nemsio atm file
    fi
 
    (( FH=FH+1 ))

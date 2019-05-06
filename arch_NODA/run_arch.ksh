@@ -18,15 +18,21 @@ offset=0
 #The next two lines are meant to break the task of copying files to a temp dir
 #and then archiving them since there is so much data and the wall time will
 #likely be >6hrs
-copy_files="YES"
-archive_files="NO"
+copy_files="NO"
+archive_files="YES"
+
+if [[ $copy_files == "YES" && $archive_files == "NO"  ]]; then; copyarch="copy";    fi
+if [[ $copy_files == "NO"  && $archive_files == "YES" ]]; then; copyarch="archive"; fi
 
 cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/arch_NODA
 
-script_base="arch_NODA"
+script_base="${copyarch}_NODA"
+mkdir -p $pdy/$cyc
+cd $pdy/$cyc
 
 while [ $CDATE -le $EDATE ]; do
-      cp -p $script_base.ksh $script_base.t${cyc}z.$pdy.group$group.ksh
+      cp -p ../../arch_NODA.ksh $script_base.t${cyc}z.$pdy.group$group.ksh
+      sed -i           "s/@copyarch@/$copyarch/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@CDATE@/$CDATE/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@SDATE@/$SDATE/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i               "s/@OFFSET@/$offset/g" $script_base.t${cyc}z.$pdy.group$group.ksh
