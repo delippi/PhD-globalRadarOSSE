@@ -14,12 +14,12 @@ yyyymm=`echo $PDY | cut -c 1-6`
 
 echo "cleaning up:"
 echo "$ROTDIR/gfs.$PDY/$cyc"
-echo "$ROTDIR/gdas.$PDYm1/$cycm1"
+#echo "$ROTDIR/gdas.$PDYm1/$cycm1"
 echo "$ARCDIR/rh$yyyy/$yyyymm/$PDY/$cyc"
 
-rm -rf  $ROTDIR/gfs.$PDY/$cyc
-rm -rf  $ROTDIR/gdas.$PDYm1/$cycm1
-rm -rf  $ARCDIR/rh$yyyy/$yyyymm/$PDY/$cyc
+#rm -rf  $ROTDIR/gfs.$PDY/$cyc
+#rm -rf  $ROTDIR/gdas.$PDYm1/$cycm1
+#rm -rf  $ARCDIR/rh$yyyy/$yyyymm/$PDY/$cyc
 
 
 echo "Successfully completed"

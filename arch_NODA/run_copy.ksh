@@ -46,14 +46,14 @@ while [ $CDATE -le $EDATE ]; do
       sed -i                 "s/@FHMAX@/$FHMAX/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@debug@/$debug/g" $script_base.t${cyc}z.$pdy.group$group.ksh
 
-#      if [[ $debug == "NO" ]]; then
-#         bsub < $script_base.t${cyc}z.$pdy.group$group.ksh
-#      elif [[ $debug == "YES" ]]; then
-#         ksh $script_base.t${cyc}z.$pdy.group$group.ksh
-#      fi
+      if [[ $debug == "NO" ]]; then
+         bsub -K < $script_base.t${cyc}z.$pdy.group$group.ksh &
+      elif [[ $debug == "YES" ]]; then
+         ksh $script_base.t${cyc}z.$pdy.group$group.ksh
+      fi
       CDATE=`${ndate} +24 $CDATE` #increment by 24 hours
       (( offset=offset+1 )) #increment by 1 day
       (( group=group+1 )) #increment group number
 done
-
+wait
 exit 0
