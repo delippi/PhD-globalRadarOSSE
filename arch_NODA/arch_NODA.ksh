@@ -2,11 +2,13 @@
 #BSUB -P FV3GFS-T2O
 #BSUB -J gfs@copyarch@.t@CYC@z.@CDATE@
 #BSUB -W 06:00                    # wall-clock time (hrs:mins)
-#BSUB -n 10                        # number of tasks in job
+#BSUB -n 1 #10                        # number of tasks in job
 #BSUB -R "rusage[mem=8192]"       # number of cores
 #BSUB -q "dev_transfer"           # queue
 #BSUB -o gfs@copyarch@.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
 
+set -e
+set -x
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
 #######  USER INPUT   ####################################
@@ -100,24 +102,24 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
 
 done
 
-#ANALYSIS FILES
-#if [[ $copy_files == "YES" && $group -eq 1 ]]; then
-#   cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2anl  ./$MASTER/. &
-#   cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p25.anl  ./$GB0p25/. &
-#   cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmanl.nemsio ./$ATMDIR/. & ; job1=$!
-#   cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcanl.nemsio ./$SFCDIR/. &
-#   wait $job1
-#fi
-
-
 if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs
-   htar -cvf $ATARDIR1/${PATHx}/${MASTER}.tar $MASTER &
-   htar -cvf $ATARDIR1/${PATHx}/${GB0p25}.tar $GB0p25 &
-   htar -cvf $ATARDIR1/${PATHx}/${ATMDIR}.tar $ATMDIR & ; job1=$!
-   htar -cvf $ATARDIR1/${PATHx}/${SFCDIR}.tar $SFCDIR &
-   wait $job1
+   cd $ARCDIR/$PATHx
+   cd $ARCDIR/$PATHx
+   hsi "cd $ATARDIR1/$PATHx; cput -R $MASTER" & ; pids+=" $!"
+   hsi "cd $ATARDIR1/$PATHx; cput -R $GB0p25" & ; pids+=" $!"
+   hsi "cd $ATARDIR1/$PATHx; cput -R $ATMDIR" & ; pids+=" $!"
+   hsi "cd $ATARDIR1/$PATHx; cput -R $SFCDIR" & ; pids+=" $!"
+   status=0
+   for p in $pids; do
+      if wait $p; then
+         echo "Process $p success"
+         (( status=status+0 ))
+      else
+         echo "Process $p fail"
+         (( status=status+1 ))
+      fi
+   done
 fi
 
-
+exit $status
 echo "Successfully completed"
-exit 0

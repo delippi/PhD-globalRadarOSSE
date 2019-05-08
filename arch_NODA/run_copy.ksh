@@ -1,4 +1,5 @@
 #!/bin/ksh -x
+set -e
 
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
@@ -48,6 +49,7 @@ while [ $CDATE -le $EDATE ]; do
 
       if [[ $debug == "NO" ]]; then
          bsub -K < $script_base.t${cyc}z.$pdy.group$group.ksh &
+         pids+=" $!"
       elif [[ $debug == "YES" ]]; then
          ksh $script_base.t${cyc}z.$pdy.group$group.ksh
       fi
@@ -55,5 +57,16 @@ while [ $CDATE -le $EDATE ]; do
       (( offset=offset+1 )) #increment by 1 day
       (( group=group+1 )) #increment group number
 done
-wait
-exit 0
+
+status=0
+for p in $pids; do
+   if wait $p; then
+      echo "Process $p success"
+      (( status=status+0 ))
+   else
+      echo "Process $p fail"
+      (( status=status+1 ))
+   fi
+done
+
+exit $status
