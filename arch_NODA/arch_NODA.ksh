@@ -104,7 +104,6 @@ done
 
 if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs
    cd $ARCDIR/$PATHx
-   cd $ARCDIR/$PATHx
    hsi "cd $ATARDIR1/$PATHx; cput -R $MASTER" & ; pids+=" $!"
    hsi "cd $ATARDIR1/$PATHx; cput -R $GB0p25" & ; pids+=" $!"
    hsi "cd $ATARDIR1/$PATHx; cput -R $ATMDIR" & ; pids+=" $!"
@@ -119,6 +118,11 @@ if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs
          (( status=status+1 ))
       fi
    done
+   #cleanup step
+   if [[ $status -eq 0 ]]; then
+      rm -rf $ROTDIR/gfs.$PDY0/$CYC  #area where experiment runs
+      rm -rf $ARCDIR/$PATHx          #archive temp dir for sorting data
+   fi
 fi
 
 exit $status
