@@ -7,10 +7,9 @@
 #BSUB -q "dev_transfer"        # queue
 #BSUB -o get.log               # output file name in which %J is replaced by the job ID
 ####### SUBROUTINES ################## SUBROUTINES ##################### SUBROUTINES ##########
+#source ~/.bashrc
 set -e
 set -x
-#module use /gpfs/hps3/emc/global/noscrub/Julie.Prestopnik/modulefiles
-#module load met/8.1
 get_nature_fcst_hr(){
 #GET NATURE FORECAST HOUR W.R.T. EXPERIMENT FORECAST HOUR
 (( fhr_n=sdate_nature - cdate )) #subtract to get dhh (days: 10's hour: 1's hour) format.
@@ -55,6 +54,8 @@ if [[ $machine == "THEIA" ]]; then
    STMP=/scratch4/NCEPDEV/stmp3/Donald.E.Lippi
 fi
 
+PSLOT="NODA-2018092300-2018100700"
+PSLOTN="NATURE-2018092300-2018100700"
 hpssbase=/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS
 sdate_nature=2018092300 #start date of nature
 sdate=${PDY}${cyc} #start date
@@ -96,50 +97,46 @@ while [[ $cdate -le $edate ]]; do #main loop - loop over forecast cycles
       export fhr_nature
 
       if [[ $grid == "0p125" ]]; then
-         hpssdir_noda="$hpssbase/NODA-2018092300-2018100700/rh2018/$valyrmn/$pdy/$cyc/$valpdy/gfs.t${cyc}z.${pdy}.pgrb2.0p125/gfs.t${cyc}z.pgrb2.0p125.f$fhr"
-         hpssdir_nature="$hpssbase/NATURE-2018092300-2018100700/rh2018/$valyrmn/$pdy/00/$valpdy/gfs.t00z.${pdy}.pgrb2.0p125/gfs.t00z.pgrb2.0p125.f$fhr_nature" #always t00z
+         hpssdir_noda="$hpssbase/$PSLOT/rh2018/$valyrmn/$pdy/$cyc/$valpdy/gfs.t${cyc}z.${pdy}.pgrb2.0p125/gfs.t${cyc}z.pgrb2.0p125.f$fhr"
+         echo "rh2018/201809/20180923/00/$valpdy"
+         echo "rh2018/201809/20180923/00/$valpdy"
+         echo "rh2018/201809/20180923/00/$valpdy"
+         echo "rh2018/201809/20180923/00/$valpdy"
+         #hpssdir_nature="$hpssbase/$PSLOTN/rh2018/201809/20180923/00/$valpdy/gfs.t00z.${valpdy}.pgrb2.0p125/gfs.t00z.pgrb2.0p125.f$fhr_nature" #always t00z for 20180923 run
+         hpssdir_nature="$hpssbase/$PSLOTN/rh2018/$valyrmn/20180923/00/$valpdy/gfs.t00z.${valpdy}.pgrb2.0p125/gfs.t00z.pgrb2.0p125.f$fhr_nature" #always t00z for 20180923 run
          noda=noda.t${cyc}z.pgrb2.0p125.f$fhr
          nature=nature.t00z.pgrb2.0p125.f$fhr_nature
       fi
 
       if [[ $fhr -le $fhrmax ]]; then #debug
       #if [[ $fhr -eq 24 ]]; then #debug
-         echo "cd /gpfs/hps2/stmp/Donald.E.Lippi/vrfy/rh2018/$yrmn/$pdy/$cyc"
+         echo "cd /gpfs/hps2/stmp/Donald.E.Lippi/$PSLOT/vrfy/rh2018/$yrmn/$pdy/$cyc"
          cd $STMP
-         mkdir -p vrfy/rh2018/$yrmn/$pdy/$cyc
-         cd vrfy/rh2018/$yrmn/$pdy/$cyc
+         mkdir -p $PSLOT/vrfy/rh2018/$yrmn/$pdy/$cyc
+         cd $PSLOT/vrfy/rh2018/$yrmn/$pdy/$cyc
 
          #pull down files from tape
          Pwd=`pwd`
          mkdir -p success
-         if [[ ! -e $nature && ! -e $noda && ! -e $Pwd/success/$noda.success ]]; then
-            pids=""
-            if [[ "gfs.t${cyc}z.pgrb2.0p125.f$fhr" != "gfs.t00z.pgrb2.0p125.f$fhr" ]]; then
-
-               hsi cget $hpssdir_noda           &; pids+=" $!"
-               hsi cget $hpssdir_nature $nature &; pids+=" $!"
-               echo $pids
-               wait4jobs $pids
-               pids=""
-               mv gfs.t${cyc}z.pgrb2.0p125.f$fhr ./$noda
-               mv gfs.t00z.pgrb2.0p125.f$fhr ./$nature
-            else #download and move to a new file sequentially.
-               hsi cget $hpssdir_noda
-               mv gfs.t${cyc}z.pgrb2.0p125.f$fhr ./$noda
-               hsi cget $hpssdir_nature
-               mv gfs.t00z.pgrb2.0p125.f$fhr ./$nature
-            fi
+         if [[ ! -e $noda  && ! -e $Pwd/success/$noda.success ]]; then
+            hsi cget $hpssdir_noda
+            mv gfs.t${cyc}z.pgrb2.0p125.f$fhr ./$noda
+         fi
+         if [[ ! -e $nature && ! -e $Pwd/success/$noda.success ]]; then
+            hsi cget $hpssdir_nature
+            mv gfs.t00z.pgrb2.0p125.f$fhr_nature ./$nature
          fi
          
          #run MET
          if [[ ! -e $Pwd/success/$noda.success ]]; then
             cd $Pwd
+            #echo "not finished" > $Pwd/success/$noda.success
             FCST_FILE=./${noda}
             OBS_FILE=./${nature}
             export MODEL="NODA"
             export DOMAIN="global"
             export METversion="V8.0"
-            #export MASKS=
+            export MASKS=/gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/grid2grid/wmo_verf_g2g.v1.00/parm/
             CONFIG_FILES=/gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/vx_NODA/config
             export fcsthrs=$fhr
             grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_ADPUPA -outdir . -v 2 #&; pids+=" $!"
@@ -151,9 +148,9 @@ while [[ $cdate -le $edate ]]; do #main loop - loop over forecast cycles
             #wait4jobs $pids
             #pids=""
             if [[ $status -eq 0 ]]; then
-               vx_tmp=/gpfs/hps2/stmp/Donald.E.Lippi/vrfy/${pdy}${cyc}
+               vx_tmp=/gpfs/hps2/stmp/Donald.E.Lippi/$PSLOT/vrfy/${pdy}${cyc}
                mkdir -p $vx_tmp
-               mv *stat $vx_tmp 
+               mv grid_stat*F$fhr*.stat $vx_tmp 
                ARCH=/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/$PSLOT/vrfy${PDY0}/${pdy}${cyc}
                cd $vx_tmp 
                hsi "mkdir -p $ARCH"

@@ -103,8 +103,8 @@ mask = {
 //            "${MASKS}/ASIA.nc",
 //            "${MASKS}/SOUTHAMERICA.nc",
 //            "${MASKS}/AFRICA.nc",
-//            "${MASKS}/O.PACIFIC.nc",
-//            "${MASKS}/O.ATLANTIC.nc" ];
+//            "${MASKS}/PACIFIC.nc",
+//            "${MASKS}/ATLANTIC.nc" ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
