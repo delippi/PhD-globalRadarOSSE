@@ -63,7 +63,18 @@ obs = fcst;
 //
 mask = {
    grid = [ "FULL" ];
-   poly = [ ]; 
+   poly = [ "${MASKS}/ALK.nc" 
+            "${MASKS}/ASA.nc",
+            "${MASKS}/ATL.nc",
+            "${MASKS}/AUS.nc",
+            "${MASKS}/EUR.nc",
+            "${MASKS}/NAM.nc",
+            "${MASKS}/NHM.nc",
+            "${MASKS}/NPR.nc",
+//            "${MASKS}/PAC.nc",
+            "${MASKS}/SHM.nc",
+            "${MASKS}/SPR.nc",
+            "${MASKS}/TRP.nc" ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
