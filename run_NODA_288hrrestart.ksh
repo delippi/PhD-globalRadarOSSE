@@ -1,8 +1,8 @@
 #!/bin/ksh
 
-CDATE=2018091100
-EDATE=2018091800 #spinup time + 7days + 7days
-PSLOT="FreeRunHigh1-${CDATE}-${EDATE}"
+CDATE=2018092300 #This signifies the beginning of spin up
+EDATE=2018100700 #This signifies the end date of spin up
+PSLOT="NODA-${CDATE}-${EDATE}"
 RES=768 #768=13km #384=26km
 GFS_CYC=1 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
 fv3gfs="global-workflow-20190306"
@@ -24,6 +24,7 @@ elif [[ $machine == 't' ]]; then #THEIA
    COMROT=/scratch4/NCEPDEV/stmp3/${USER}/fv3gfs_dl2rw/$CDATE
    EXPDIR=/scratch4/NCEPDEV/fv3-cam/noscrub/${USER}/fv3gfs_dl2rw/$CDATE
 fi
+mkdir -p $ICSDIR/$PSLOT
 IDATE=$CDATE
 EDATE=$EDATE
 
@@ -79,9 +80,9 @@ if [[ \$ans == 'y' ]]; then
    cd -
 fi
 
-CDATE=2018091100
-EDATE=2018091800
-PSLOT="FreeRunHigh1-${CDATE}-${EDATE}"
+CDATE=2018092300
+EDATE=2018100700
+PSLOT="NODA-${CDATE}-${EDATE}"
 EXPDIR=\$mesonoscrub/fv3gfs_dl2rw/\$CDATE/
 
 \$mesosave/\${fv3gfs}/ush/rocoto/setup_workflow_fcstonly.py --expdir \$EXPDIR/\$PSLOT/

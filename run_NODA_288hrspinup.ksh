@@ -1,19 +1,17 @@
-#/bin/ksh
+#!/bin/ksh
 
-CDATE=2018091100
-EDATE=2018091800
-PSLOT="FreeRunLow4-${CDATE}-${EDATE}"
-RES_DET=384 #768 #384
-RES_ENS=384 #384 #192
-NENS=80
-GFS_CYC=4 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
+CDATE=2018091100 #This signifies the beginning of spin up
+EDATE=2018092300 #This signifies the end date of spin up
+PSLOT="NODA-${CDATE}-${EDATE}"
+RES=768 #768=13km #384=26km
+GFS_CYC=1 # 0=none; 1=00z only [default]; 2=00z & 12z; 4=all cycles
 fv3gfs="global-workflow-20190306"
-fcst_only=".false."
-set -x
+
+
 machine=`hostname | cut -c 1`
 if   [[ $machine == 'l' || $machine == 's' ]]; then #LUNA or SURGE
    DIR=/gpfs/hps3/emc/meso/save/${USER}/${fv3gfs}/ush
-   ICSDIR=/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$CDATE/FV3ICS/$PSLOT/
+   ICSDIR=/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/FV3ICS/$CDATE/
    NCEPCOMROOT=/gpfs/hps/nco/ops/com
    CONFIGDIR=/gpfs/hps3/emc/meso/save/${USER}/${fv3gfs}/parm/config
    COMROT=/gpfs/hps2/ptmp/$USER/fv3gfs_dl2rw/$CDATE/
@@ -26,10 +24,11 @@ elif [[ $machine == 't' ]]; then #THEIA
    COMROT=/scratch4/NCEPDEV/stmp3/${USER}/fv3gfs_dl2rw/$CDATE
    EXPDIR=/scratch4/NCEPDEV/fv3-cam/noscrub/${USER}/fv3gfs_dl2rw/$CDATE
 fi
+mkdir -p $ICSDIR/$PSLOT
 IDATE=$CDATE
 EDATE=$EDATE
-RES=$RES_DET
-CDUMP='gdas'
+
+CDUMP='gfs'
 
 cd $DIR
 
@@ -37,24 +36,23 @@ echo "--pslot $PSLOT"
 echo "--configdir $CONFIGDIR"
 echo "--idate $IDATE"
 echo "--edate $EDATE"
-echo "--icsdir $ICSDIR"
-echo "--expdir $EXPDIR"
-echo "--resdet $RES_DET"
-echo "--resens $RES_ENS"
-echo "--nens $NENS"
+echo "--res $RES"
 echo "--gfs_cyc $GFS_CYC"
 echo "--comrot $COMROT"
-echo "./rocoto/setup_expt.py --pslot $PSLOT --configdir $CONFIGDIR --idate $IDATE --edate $EDATE --icsdir $ICSDIR --comrot $COMROT --expdir $EXPDIR --resdet $RES_DET --resens $RES_ENS --nens $NENS --gfs_cyc $GFS_CYC"
-echo "Set up cycled experiment only (y/n)?"
+echo "--expdir $EXPDIR"
+echo "./rocoto/setup_expt_fcstonly.py --pslot $PSLOT --configdir $CONFIGDIR --idate $IDATE --edate $EDATE --comrot $COMROT --expdir $EXPDIR --res $RES --gfs_cyc $GFS_CYC"
+echo "Set up forecast only experiment (y/n)?"
 read ansFCSTEXP
 if [[ $ansFCSTEXP == 'y' ]]; then
-   ./rocoto/setup_expt.py --pslot $PSLOT --configdir $CONFIGDIR --idate $IDATE --edate $EDATE --icsdir $ICSDIR --comrot $COMROT --expdir $EXPDIR --resdet $RES_DET --resens $RES_ENS --nens $NENS --gfs_cyc $GFS_CYC
+   ./rocoto/setup_expt_fcstonly.py --pslot $PSLOT --configdir $CONFIGDIR --idate $IDATE --edate $EDATE --comrot $COMROT --expdir $EXPDIR --res $RES --gfs_cyc $GFS_CYC
 fi
-echo "Set up cycled global workflow (y/n)?"
+echo "Set up forecast only workflow (y/n)?"
 read ansWRKFLW
 if [[ $ansWRKFLW == 'y' ]]; then
-   ./rocoto/setup_workflow.py --expdir $EXPDIR/$PSLOT/
+   ./rocoto/setup_workflow_fcstonly.py --expdir $EXPDIR/$PSLOT/
 fi
+
+
 
 echo "make rocotorun sh? (yn) >"
 read ans
@@ -78,16 +76,16 @@ read ans
 if [[ \$ans == 'y' ]]; then
    cd \$mesosave/\$fv3gfs/sorc
    ./build_gsi.sh
-   ./link_fv3gfs.sh emc cray 
+   ./link_fv3gfs.sh emc cray
    cd -
 fi
 
 CDATE=2018091100
 EDATE=2018091800
-PSLOT="FreeRunLow4-\${CDATE}-\${EDATE}"
+PSLOT="NODA-${CDATE}-${EDATE}"
 EXPDIR=\$mesonoscrub/fv3gfs_dl2rw/\$CDATE/
 
-\$mesosave/\${fv3gfs}/ush/rocoto/setup_workflow.py --expdir \$EXPDIR/\$PSLOT/
+\$mesosave/\${fv3gfs}/ush/rocoto/setup_workflow_fcstonly.py --expdir \$EXPDIR/\$PSLOT/
 
 XML=\${PSLOT}.xml
 DB=\${PSLOT}.db

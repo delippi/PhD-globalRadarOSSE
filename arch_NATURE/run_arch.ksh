@@ -23,6 +23,7 @@ offset=0
 #likely be >6hrs
 copy_files="NO"
 archive_files="YES"
+cleanup="YES" #careful with this! you could end up deleting everything! needs to be triple checked!
 
 if [[ $copy_files == "YES" && $archive_files == "NO"  ]]; then; copyarch="copy";    fi
 if [[ $copy_files == "NO"  && $archive_files == "YES" ]]; then; copyarch="archive"; fi
@@ -45,11 +46,12 @@ while [ $CDATE -le $EDATE ]; do
       sed -i                 "s/@group@/$group/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@FHMAX@/$FHMAX/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@debug@/$debug/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      if [[ $CDATE -eq $EDATE  ]]; then
-         sed -i               "s/@cleanup@/YES/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      else
-         sed -i                "s/@cleanup@/NO/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      fi
+      sed -i             "s/@cleanup@/$cleanup/g" $script_base.t${cyc}z.$pdy.group$group.ksh
+#      if [[ $CDATE -eq $EDATE  ]]; then
+#         sed -i               "s/@cleanup@/YES/g" $script_base.t${cyc}z.$pdy.group$group.ksh
+#      else
+#         sed -i                "s/@cleanup@/NO/g" $script_base.t${cyc}z.$pdy.group$group.ksh
+#      fi
 
       if [[ $debug == "NO" ]]; then
          bsub -K < $script_base.t${cyc}z.$pdy.group$group.ksh &
@@ -73,4 +75,13 @@ for p in $pids; do
    fi
 done
 
+if [[ $status -ne 0 ]]; then; exit $status; fi
+
+if [[ $status -eq 0 && $cleanup == "YES" ]]; then
+   echo "rm -rf $dir_to_be_cleaned_ptmp"  #area where experiment runs
+   #rm -rf $dir_to_be_cleaned_ptmp
+fi
+
+
+echo "Successfully completed"
 exit $status

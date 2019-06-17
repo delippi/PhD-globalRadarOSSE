@@ -30,6 +30,21 @@ group=@group@
 cleanup="@cleanup@"
 ##########################################################
 
+#SUBROUTINES #########################
+wait4jobs(){
+for p in $pids; do
+   if wait $p; then
+      echo "Process $p success"
+      (( status=status+0 ))
+   else
+      echo "Process $p fail"
+      (( status=status+1 ))
+   fi
+done
+if [[ $status -ne 0 ]]; then; exit $status; fi
+}
+#SUBROUTINES #########################
+
 # Definition of how I will archive my data on HPSS:
 #/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_NAMv4/nwrw_019/rh2015/201510/20151030
 cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/arch_NATURE
@@ -56,7 +71,7 @@ echo $ARCDIR
 
 
 MASTER=gfs.t${CYC}z.$PDY.master.grb2
-GB0p25=gfs.t${CYC}z.$PDY.pgrb2.0p25
+GB0p125=gfs.t${CYC}z.$PDY.pgrb2.0p125
 ATMDIR=gfs.t${CYC}z.$PDY.atm.nemsio
 SFCDIR=gfs.t${CYC}z.$PDY.sfc.nemsio
 
@@ -87,14 +102,14 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
          hsi "cd $ATARDIR0; mkdir -p $PSLOT/${PATHx}"
       fi
       mkdir -p $MASTER
-      mkdir -p $GB0p25
+      mkdir -p $GB0p125
       mkdir -p $ATMDIR
       mkdir -p $SFCDIR
    fi
 
    if [[ $copy_files == "YES" && $debug == "NO" ]]; then # these get moved at a later step
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH} ./$MASTER/. & ; job1=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p25.f${FH} ./$GB0p25/. & ; job2=$!
+      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p125.f${FH} ./$GB0p125/. & ; job2=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio  ./$ATMDIR/. & ; job3=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio  ./$SFCDIR/. & ; job4=$!
       wait $job1 $job2 $job4 #don't wait on the nemsio atm file
@@ -104,30 +119,22 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
       pids=""
 
       cd $ARCDIR/$PATHx/$MASTER
-      hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &
-      pids+=" $!"
+      hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &; job=$!
+      pids+=" $job"; echo "master: $job"
 
-      cd $ARCDIR/$PATHx/$GB0p25
-      hsi "cd $ATARDIR1/$PATHx; cput -P $GB0p25/gfs.t${CYC}z.pgrb2b.0p25.f${FH}" &
-      pids+=" $!"
+      cd $ARCDIR/$PATHx/$GB0p125
+      hsi "cd $ATARDIR1/$PATHx; cput -P $GB0p125/gfs.t${CYC}z.pgrb2.0p125.f${FH}" &; job=$!
+      pids+=" $job"; echo "0p125 job id: $job"
 
       cd $ARCDIR/$PATHx/$ATMDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &
-      pids2+=" $!"
+      hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &; job=$!
+      pids2+=" $job"; echo "atm job id: $job"
 
       cd $ARCDIR/$PATHx/$SFCDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &
-      pids+=" $!"
+      hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &; job=$!
+      pids+=" $job"; echo "sfc job id: $job"
 
-      for p in $pids; do
-         if wait $p; then
-            echo "Process $p success"
-            (( status=status+0 ))
-         else
-            echo "Process $p fail"
-            (( status=status+1 ))
-         fi
-      done
+      wait4jobs $pids
       pids=""
 
    fi
@@ -135,19 +142,15 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
 done
 
 if [[ $archive_files == "YES" && $cleanup == "YES" ]]; then
-   for p2 in $pids2; do
-      if wait $p2; then
-         echo "Process $p2 success"
-         (( status=status+0 ))
-      else
-         echo "Process $p2 fail"
-         (( status=status+1 ))
-      fi
-   done
+   wait4jobs $pids2
+   pids2=""
    #cleanup step
    if [[ $status -eq 0 ]]; then
-      echo "rm -rf $ROTDIR/gfs.$PDY0/$CYC"  #area where experiment runs
-      echo "rm -rf $ARCDIR/$PATHx"          #archive temp dir for sorting data
+      export dir_to_be_cleaned_ptmp=$ROTDIR/gfs.$PDY0/$CYC
+      export dir_to_be_cleaned_stmp=$ARCDIR/$PATHx
+      echo "rm -rf $dir_to_be_cleaned_stmp"
+      #echo "rm -rf $ROTDIR/gfs.$PDY0/$CYC"  #area where experiment runs
+      #echo "rm -rf $ARCDIR/$PATHx"          #archive temp dir for sorting data
       #rm -rf $ROTDIR/gfs.$PDY0/$CYC  #area where experiment runs
       #rm -rf $ARCDIR/$PATHx          #archive temp dir for sorting data
    fi

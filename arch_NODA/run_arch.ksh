@@ -45,11 +45,6 @@ while [ $CDATE -le $EDATE ]; do
       sed -i                 "s/@group@/$group/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@FHMAX@/$FHMAX/g" $script_base.t${cyc}z.$pdy.group$group.ksh
       sed -i                 "s/@debug@/$debug/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      if [[ $CDATE -eq $EDATE  ]]; then
-         sed -i               "s/@cleanup@/YES/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      else
-         sed -i                "s/@cleanup@/NO/g" $script_base.t${cyc}z.$pdy.group$group.ksh
-      fi
 
       if [[ $debug == "NO" ]]; then
          bsub -K < $script_base.t${cyc}z.$pdy.group$group.ksh &
@@ -73,4 +68,16 @@ for p in $pids; do
    fi
 done
 
+if [[ $status -ne 0 ]]; then; exit $status; fi
+
+if [[ $status -eq 0 ]]; then
+   PSLOT=NODA-2018092300-2018100700
+   ROTDIR="/gpfs/hps2/ptmp/Donald.E.Lippi/fv3gfs_dl2rw/2018092300/$PSLOT"
+   cd $ROTDIR/gfs.$pdy/$cyc  #move to the dir
+   rm -f gfs* 
+   echo "success" > ./NODA-${pdy}${cyc}.success #write success file to start met jobs
+   cd - #move back to where we were before.
+fi
+
+echo "Successfully completed"
 exit $status

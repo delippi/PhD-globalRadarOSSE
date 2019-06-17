@@ -1,7 +1,7 @@
 #!/bin/ksh
 
 hr=0
-groups_of=2
+groups_of=4
 hrmax=168
 typeset -Z3 count hr 
 lst=""
@@ -40,10 +40,10 @@ while [[ $hr -le $hrmax ]]; do
 done
 
 
-echo "<var name=\"grp\">$grp</var>"
+echo "        <var name=\"grp\">$grp</var>"
 echo ""
-echo "<var name=\"dep\">$dep</var>"
+echo "        <var name=\"dep\">$dep</var>"
 echo ""
-echo "<var name=\"lst\">$lst</var>"
+echo "        <var name=\"lst\">$lst</var>"
 
 

@@ -68,5 +68,7 @@ for p in $pids; do
       (( status=status+1 ))
    fi
 done
+if [[ $status -ne 0 ]]; then; exit $status; fi
+echo "Successfully completed"
 
 exit $status
