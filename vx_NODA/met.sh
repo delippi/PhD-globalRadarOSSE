@@ -136,14 +136,16 @@ while [[ $cdate -le $edate ]]; do #main loop - loop over forecast cycles
             export MODEL="NODA"
             export DOMAIN="global"
             export METversion="V8.0"
-            export MASKS=/gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/grid2grid/wmo_verf_g2g.v1.00/parm/
+            export MASKS=/gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/vx_masks
             CONFIG_FILES=/gpfs/hps3/emc/meso/save/Donald.E.Lippi/PhD-globalRadarOSSE/vx_NODA/config
             export fcsthrs=$fhr
             grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_ADPUPA -outdir . -v 2 #&; pids+=" $!"
             grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_ADPSFC -outdir . -v 2 #&; pids+=" $!"
             grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_REFC   -outdir . -v 2 #&; pids+=" $!"
+            grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_REFC_NBR   -outdir . -v 2 #&; pids+=" $!"
             if [[ $fhr -gt 0 ]]; then
                grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_APCP   -outdir . -v 2 #&; pids+=" $!"
+               grid_stat $FCST_FILE $OBS_FILE $CONFIG_FILES/GridStatConfig_APCP_NBR   -outdir . -v 2 #&; pids+=" $!"
             fi
             #wait4jobs $pids
             #pids=""
