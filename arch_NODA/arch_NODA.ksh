@@ -7,6 +7,8 @@
 #BSUB -q "dev_transfer"           # queue
 #BSUB -o gfs@copyarch@.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
 
+#synopsis: This script is a template used by run_arch.ksh and run_copy.ksh to copy and archive forecasts. 
+
 set -e
 set -x
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
@@ -100,38 +102,39 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
       if [[ $debug == "NO" ]]; then
          hsi "cd $ATARDIR0; mkdir -p $PSLOT/${PATHx}"
       fi
-      mkdir -p $MASTER
+      #mkdir -p $MASTER
       mkdir -p $GB0p125
-      mkdir -p $ATMDIR
-      mkdir -p $SFCDIR
+      #mkdir -p $ATMDIR
+      #mkdir -p $SFCDIR
    fi
 
    if [[ $copy_files == "YES" && $debug == "NO" ]]; then # these get moved at a later step
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH} ./$MASTER/. & ; job1=$!
+      #cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH} ./$MASTER/. & ; job1=$!
       cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p125.f${FH} ./$GB0p125/. & ; job2=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio  ./$ATMDIR/. & ; job3=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio  ./$SFCDIR/. & ; job4=$!
-      wait $job1 $job2 $job4 #don't wait on the nemsio atm file
+      #cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio  ./$ATMDIR/. & ; job3=$!
+      #cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio  ./$SFCDIR/. & ; job4=$!
+      #wait $job1 $job2 $job4 #don't wait on the nemsio atm file
+      wait $job2
    fi
    if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs 
 
       pids=""
 
-      cd $ARCDIR/$PATHx/$MASTER
-      hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &; job=$!
-      pids+=" $job"; echo "master: $job"
+      #cd $ARCDIR/$PATHx/$MASTER
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &; job=$!
+      #pids+=" $job"; echo "master: $job"
 
       cd $ARCDIR/$PATHx/$GB0p125
       hsi "cd $ATARDIR1/$PATHx; cput -P $GB0p125/gfs.t${CYC}z.pgrb2.0p125.f${FH}" &; job=$!
       pids+=" $job"; echo "0p125 job id: $job"
 
-      cd $ARCDIR/$PATHx/$ATMDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &; job=$!
-      pids2+=" $job"; echo "atm job id: $job"
+      #cd $ARCDIR/$PATHx/$ATMDIR
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &; job=$!
+      #pids2+=" $job"; echo "atm job id: $job"
 
-      cd $ARCDIR/$PATHx/$SFCDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &; job=$!
-      pids+=" $job"; echo "sfc job id: $job"
+      #cd $ARCDIR/$PATHx/$SFCDIR
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &; job=$!
+      #pids+=" $job"; echo "sfc job id: $job"
 
       wait4jobs $pids
       pids=""
