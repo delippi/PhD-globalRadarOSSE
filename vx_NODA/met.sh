@@ -41,11 +41,12 @@ if [[ $status -ne 0 ]]; then; exit $status; fi
 }
 
 ####### MAIN PROGRAM ################# MAIN PROGRAM #################### MAIN PROGRAM #########
-machine="SURGE"
+machine="LUNA"
+mkdir -p /gpfs/hps3/emc/meso/save/Donald.E.Lippi/RMSD
 cd /gpfs/hps3/emc/meso/save/Donald.E.Lippi/RMSD
 throttle_jobs=2
 
-if [[ $machine == "SURGE" ]]; then
+if [[ $machine == "SURGE" || $machine == "LUNA" ]]; then
    export ndate=/u/Donald.E.Lippi/bin/ndate
    STMP=/gpfs/hps2/stmp/Donald.E.Lippi
 fi
