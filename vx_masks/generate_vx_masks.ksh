@@ -14,52 +14,52 @@ cp $input_file $mask_file
 
 
 #SHM
-gen_vx_mask $input_file $mask_file lat_SHM.nc -type lat -thresh '>=-90&&<=-20' -name 'SHM'
+gen_vx_mask $input_file $mask_file SHM.nc -type lat -thresh '>=-90&&<=-20' -name 'SHM'
 
 #NHM
-gen_vx_mask $input_file $mask_file lat_NHM.nc -type lat -thresh '>=20&&<=90' -name 'NHM'
+gen_vx_mask $input_file $mask_file NHM.nc -type lat -thresh '>=20&&<=90' -name 'NHM'
 
 #TRP
-gen_vx_mask $input_file $mask_file lat_TRP.nc -type lat -thresh '>=-20&&<=20' -name 'TRP'
+gen_vx_mask $input_file $mask_file TRP.nc -type lat -thresh '>=-20&&<=20' -name 'TRP'
 
 #SPR
-gen_vx_mask $input_file $mask_file lat_SPR.nc -type lat -thresh '>=-90&&<=-60' -name 'SPR'
+gen_vx_mask $input_file $mask_file SPR.nc -type lat -thresh '>=-90&&<=-60' -name 'SPR'
 
 #NPR
-gen_vx_mask $input_file $mask_file lat_NPR.nc -type lat -thresh '>=60&&<=90' -name 'NPR'
+gen_vx_mask $input_file $mask_file NPR.nc -type lat -thresh '>=60&&<=90' -name 'NPR'
 
 
 
 
 #NAM
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge20&&le60'
-gen_vx_mask lat_band.nc lat_band.nc lat_NAM.nc -type lon -thresh 'ge-145&&le-50' -intersection -name 'NAM'
+gen_vx_mask lat_band.nc lat_band.nc NAM.nc -type lon -thresh 'ge-145&&le-50' -intersection -name 'NAM'
 
 #EUR
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge25&&le70'
-gen_vx_mask lat_band.nc lat_band.nc lat_EUR.nc -type lon -thresh 'ge-10&&le28' -intersection -name 'EUR'
+gen_vx_mask lat_band.nc lat_band.nc EUR.nc -type lon -thresh 'ge-10&&le28' -intersection -name 'EUR'
 
 #ASA
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge25&&le65'
-gen_vx_mask lat_band.nc lat_band.nc lat_ASA.nc -type lon -thresh 'ge60&&le145' -intersection -name 'ASA'
+gen_vx_mask lat_band.nc lat_band.nc ASA.nc -type lon -thresh 'ge60&&le145' -intersection -name 'ASA'
 
 #AUS
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge-55&&le-10'
-gen_vx_mask lat_band.nc lat_band.nc lat_AUS.nc -type lon -thresh 'ge90&&le180' -intersection -name 'AUS'
+gen_vx_mask lat_band.nc lat_band.nc AUS.nc -type lon -thresh 'ge90&&le180' -intersection -name 'AUS'
 
 #ALK
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge55&&le72'
-gen_vx_mask lat_band.nc lat_band.nc lat_ALK.nc -type lon -thresh 'ge-171&&le-139' -intersection -name 'ALK'
+gen_vx_mask lat_band.nc lat_band.nc ALK.nc -type lon -thresh 'ge-171&&le-139' -intersection -name 'ALK'
 
 
-plot_data_plane lat_NHM.nc lat_NHM.ps 'name="NHM"; level="(*,*)";'; convert -rotate "90" lat_NHM.ps lat_NHM.png
-plot_data_plane lat_SHM.nc lat_SHM.ps 'name="SHM"; level="(*,*)";'; convert -rotate "90" lat_SHM.ps lat_SHM.png
-plot_data_plane lat_NAM.nc lat_NAM.ps 'name="NAM"; level="(*,*)";'; convert -rotate "90" lat_NAM.ps lat_NAM.png
-plot_data_plane lat_EUR.nc lat_EUR.ps 'name="EUR"; level="(*,*)";'; convert -rotate "90" lat_EUR.ps lat_EUR.png
-plot_data_plane lat_AUS.nc lat_AUS.ps 'name="AUS"; level="(*,*)";'; convert -rotate "90" lat_AUS.ps lat_AUS.png
-plot_data_plane lat_ASA.nc lat_ASA.ps 'name="ASA"; level="(*,*)";'; convert -rotate "90" lat_ASA.ps lat_ASA.png
-plot_data_plane lat_TRP.nc lat_TRP.ps 'name="TRP"; level="(*,*)";'; convert -rotate "90" lat_TRP.ps lat_TRP.png
-plot_data_plane lat_SPR.nc lat_SPR.ps 'name="SPR"; level="(*,*)";'; convert -rotate "90" lat_SPR.ps lat_SPR.png
-plot_data_plane lat_NPR.nc lat_NPR.ps 'name="NPR"; level="(*,*)";'; convert -rotate "90" lat_NPR.ps lat_NPR.png
-plot_data_plane lat_ALK.nc lat_ALK.ps 'name="ALK"; level="(*,*)";'; convert -rotate "90" lat_ALK.ps lat_ALK.png
+plot_data_plane NHM.nc NHM.ps 'name="NHM"; level="(*,*)";'; convert -rotate "90" NHM.ps NHM.png
+plot_data_plane SHM.nc SHM.ps 'name="SHM"; level="(*,*)";'; convert -rotate "90" SHM.ps SHM.png
+plot_data_plane NAM.nc NAM.ps 'name="NAM"; level="(*,*)";'; convert -rotate "90" NAM.ps NAM.png
+plot_data_plane EUR.nc EUR.ps 'name="EUR"; level="(*,*)";'; convert -rotate "90" EUR.ps EUR.png
+plot_data_plane AUS.nc AUS.ps 'name="AUS"; level="(*,*)";'; convert -rotate "90" AUS.ps AUS.png
+plot_data_plane ASA.nc ASA.ps 'name="ASA"; level="(*,*)";'; convert -rotate "90" ASA.ps ASA.png
+plot_data_plane TRP.nc TRP.ps 'name="TRP"; level="(*,*)";'; convert -rotate "90" TRP.ps TRP.png
+plot_data_plane SPR.nc SPR.ps 'name="SPR"; level="(*,*)";'; convert -rotate "90" SPR.ps SPR.png
+plot_data_plane NPR.nc NPR.ps 'name="NPR"; level="(*,*)";'; convert -rotate "90" NPR.ps NPR.png
+plot_data_plane ALK.nc ALK.ps 'name="ALK"; level="(*,*)";'; convert -rotate "90" ALK.ps ALK.png
 

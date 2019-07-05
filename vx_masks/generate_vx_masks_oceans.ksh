@@ -15,8 +15,8 @@ cp $input_file $mask_file
 
 #ATL
 gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge0&&le55'
-gen_vx_mask lat_band.nc lat_band.nc lat_ATL.nc -type lon -thresh 'ge-70&&le-10' -intersection -name 'ATL'
-plot_data_plane lat_ATL.nc lat_ATL.ps 'name="ATL"; level="(*,*)";'; convert -rotate "90" lat_ATL.ps lat_ATL.png
+gen_vx_mask lat_band.nc lat_band.nc ATL.nc -type lon -thresh 'ge-70&&le-10' -intersection -name 'ATL'
+plot_data_plane ATL.nc ATL.ps 'name="ATL"; level="(*,*)";'; convert -rotate "90" ATL.ps ATL.png
 
 ##PAC - can't get this to work...
 #gen_vx_mask $input_file $mask_file lat_band.nc -type lat -thresh 'ge-55&&le55'
