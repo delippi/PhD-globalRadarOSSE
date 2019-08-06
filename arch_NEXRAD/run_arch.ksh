@@ -1,5 +1,7 @@
 #!/bin/ksh
 set -x
+set -e
+
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
 cyc=12

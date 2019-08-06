@@ -78,7 +78,7 @@ SFCDIR=gfs.t${CYC}z.$PDY0.sfc.nemsio
 
 create_paths="YES"
 status=0
-pids2=""
+#pids2=""
 
 while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
    valtime=`${ndate} +${FH} ${PDY0}${CYC}`
@@ -143,10 +143,10 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
    (( FH=FH+1 ))
 done
 
-if [[ $archive_files == "YES" ]]; then
-   wait4jobs $pids2
-   pids2=""
-fi
+#if [[ $archive_files == "YES" ]]; then
+#   wait4jobs $pids2
+#   pids2=""
+#fi
 
 exit $status
 echo "Successfully completed"
