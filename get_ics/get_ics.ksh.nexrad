@@ -1,0 +1,125 @@
+#!/bin/ksh
+#BSUB -P FV3GFS-T2O
+#BSUB -J fv3ics
+#BSUB -W 06:00                    # wall-clock time (hrs:mins)
+#BSUB -n 1                        # number of tasks in job
+#BSUB -R "rusage[mem=8192]"       # number of cores
+#BSUB -q "dev_transfer"           # queue
+#BSUB -o fv3ics.log               # output file name in which %J is replaced by the job ID
+
+# This script downloads initial conditions from HPSS for global radar wind assimilation experiments.
+#set -x
+
+#how to groupd the archive jobs.
+groups_of=10 #groups of 10 would have  8 jobs for 80 members plus one for the ctl - 13:12 min
+groups_of=4  #groups of  4 would have 20 jobs for 80 members plus one for the ctl -  6:42 min
+CDATE=2018091100
+EDATE=2018092300
+EXP="NODA" #NEXRAD and NODA
+PSLOT="${EXP}-${CDATE}-${EDATE}"
+PSLOT2="NEXRAD-2018092300-2018100700"
+PDY=20180911
+CYC=00
+
+HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/FV3ICS"
+ICSDIR="/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$EDATE/${PSLOT2}/gdas.2"
+
+
+echo $ICSDIR
+#exit
+mem=1
+memgroup=1
+typeset -Z3 mem
+typeset -Z3 max
+typeset -Z3 min
+
+#ENSEMBLE
+(( maxjobs=80/$groups_of ))
+maxjobs=0
+while [[ $memgroup -le $maxjobs   ]]; do
+
+(( max= memgroup*groups_of ))
+(( min= (memgroup-1)*groups_of+1 ))
+
+cat << EOF > get_ics.ksh.improved.mem$mem 
+#!/bin/ksh
+#BSUB -P FV3GFS-T2O
+#BSUB -J fv3ics.mem$min-$max
+#BSUB -W 06:00                    # wall-clock time (hrs:mins)
+#BSUB -n 1                        # number of tasks in job
+#BSUB -R "rusage[mem=8192]"       # number of cores
+#BSUB -q "dev_transfer"           # queue
+#BSUB -o fv3ics.mem$min-$max.log  # output file name in which %J is replaced by the job ID
+
+# This script downloads initial conditions from HPSS for global radar wind assimilation experiments.
+#set -x
+
+groups_of=10 #how to group the archive read. groups of 10 would have 8 jobs for 80 members plus one for the control
+CDATE=2018091100
+EDATE=2018092300
+EXP="NODA" #NEXRAD and NODA
+PSLOT="${EXP}-${CDATE}-${EDATE}"
+PDY=20180911
+CYC=00
+
+HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/FV3ICS"
+#ICSDIR="/gpfs/hps2/ptmp/${USER}/fv3gfs_dl2rw/$CDATE/FV3ICS.getics/"
+mkdir -p $ICSDIR
+cd $ICSDIR
+mem=$min
+typeset -Z3 mem
+
+while [[ \$mem -le $max ]]; do
+
+   htar -xvf ${HPSSDIR}/${PSLOT}.tar ${PSLOT}/enkf.gdas.${PDY}/${CYC}/mem\${mem}/
+   (( mem=mem+1 ))
+
+done
+
+
+EOF
+   mv get_ics.ksh.improved.mem$mem get_ics.ksh.improved.mem$min-$max
+
+   if [[ 1 -eq 1 ]]; then
+      bsub < get_ics.ksh.improved.mem$min-$max
+   fi
+
+   (( memgroup=memgroup+1 ))
+done
+
+
+
+
+cat << EOF > get_ics.ksh.improved.control
+#!/bin/ksh
+#BSUB -P FV3GFS-T2O
+#BSUB -J fv3ics.control
+#BSUB -W 06:00                    # wall-clock time (hrs:mins)
+#BSUB -n 1                        # number of tasks in job
+#BSUB -R "rusage[mem=8192]"       # number of cores
+#BSUB -q "dev_transfer"           # queue
+#BSUB -o fv3ics.control.log       # output file name in which %J is replaced by the job ID
+
+# This script downloads initial conditions from HPSS for global radar wind assimilation experiments.
+#set -x
+
+CDATE=2018091100
+EDATE=2018092300
+EXP="NODA" #NEXRAD and NODA
+PSLOT="${EXP}-${CDATE}-${EDATE}"
+PDY=20180911
+CYC=00
+
+HPSSDIR="/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_FV3GFS/FV3ICS"
+mkdir -p $ICSDIR
+cd $ICSDIR
+
+htar -xvf ${HPSSDIR}/${PSLOT}_ICS288.tar ${PSLOT}/gfs.${PDY}/
+
+EOF
+
+if [[ 1 -eq 1 ]]; then
+   bsub < get_ics.ksh.improved.control
+fi
+
+
