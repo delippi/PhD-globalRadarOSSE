@@ -1,11 +1,14 @@
 #!/bin/ksh
-#BSUB -P FV3GFS-T2O
+##BSUB -P FV3GFS-T2O
+#BSUB -P GFS-DEV
 #BSUB -J gfs@copyarch@.t@CYC@z.@CDATE@
 #BSUB -W 06:00                    # wall-clock time (hrs:mins)
-#BSUB -n 1 #10                        # number of tasks in job
+#BSUB -n 1                        # number of tasks in job
 #BSUB -R "rusage[mem=8192]"       # number of cores
 #BSUB -q "dev_transfer"           # queue
 #BSUB -o gfs@copyarch@.t@CYC@z.@CDATE@.log      # output file name in which %J is replaced by the job ID
+
+#synopsis: This script is a template used by run_arch.ksh and run_copy.ksh to copy and archive forecasts. 
 
 set -e
 set -x
@@ -17,7 +20,7 @@ archive_files="@archive_files@"
 SDATE=@SDATE@
 CDATE=@CDATE@
 offset=@OFFSET@
-PSLOT="NEXRAD-2018092300-2018100700}"
+PSLOT="NEXRAD-2018092300-2018100700"
 ROTDIR="/gpfs/hps2/ptmp/Donald.E.Lippi/fv3gfs_dl2rw/2018092300/$PSLOT"
 STMP="/gpfs/hps2/stmp/$USER/"
 ARCDIR="$STMP/archive/$PSLOT"
@@ -27,8 +30,22 @@ FHOUT_GFS=1
 FHMAX=@FHMAX@
 debug="@debug@"
 group=@group@
-cleanup="@cleanup@"
 ##########################################################
+
+#SUBROUTINES #########################
+wait4jobs(){
+for p in $pids; do
+   if wait $p; then
+      echo "Process $p success"
+      (( status=status+0 ))
+   else
+      echo "Process $p fail"
+      (( status=status+1 ))
+   fi
+done
+if [[ $status -ne 0 ]]; then; exit $status; fi
+}
+#SUBROUTINES #########################
 
 # Definition of how I will archive my data on HPSS:
 #/NCEPDEV/emc-meso/5year/Donald.E.Lippi/rw_NAMv4/nwrw_019/rh2015/201510/20151030
@@ -56,17 +73,16 @@ valmon0=`echo $valtime0   | cut -c 5-6`
 valyr0=`echo $valtime0    | cut -c 1-4`
 
 MASTER=gfs.t${CYC}z.$PDY0.master.grb2
-GB0p25=gfs.t${CYC}z.$PDY0.pgrb2.0p25
+GB0p125=gfs.t${CYC}z.$PDY0.pgrb2.0p125
 ATMDIR=gfs.t${CYC}z.$PDY0.atm.nemsio
 SFCDIR=gfs.t${CYC}z.$PDY0.sfc.nemsio
 
 create_paths="YES"
 status=0
-pids2=""
+fortfile="YES"
 
 while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
    valtime=`${ndate} +${FH} ${PDY0}${CYC}`
-   #valtime=`${ndate} +${CYC} ${valtime}`
    valpdy=`echo $valtime   | cut -c 1-8`
    valcyc=`echo $valtime   | cut -c 9-10`
    valyrmon=`echo $valtime | cut -c 1-6`
@@ -74,85 +90,87 @@ while [[ $FH -ge $offset_low && $FH -lt $offset_high && $FH -le $FHMAX ]]; do
    valyr=`echo $valtime    | cut -c 1-4`
    echo $valtime $FH $offset_low $offset_high
 
-   PATHx=rh${valyr}/${valyrmon}/${valpdy}
+   #PATHx=rh${valyr}/${valyrmon}/${valpdy}
    PATHx=rh${valyr}/${valyrmon}/${PDY0}/${CYC}/${valpdy}
 
    if [[ $create_paths == "YES" ]]; then
       create_paths="NO" #turn off after first pass
       cd $STMP                 #/gpfs/hps2/stmp/Donald.E.Lippi/
       mkdir -p archive/$PSLOT
-      cd $ARCDIR               #archive/NODA-2018092300-2018100700
+      cd $ARCDIR               #archive/NEXRAD-2018092300-2018100700
       mkdir -p ${PATHx} 
       cd ${PATHx}              #rh2018/201809/20180923/12/20180923
       if [[ $debug == "NO" ]]; then
          hsi "cd $ATARDIR0; mkdir -p $PSLOT/${PATHx}"
       fi
-      mkdir -p $MASTER
-      mkdir -p $GB0p25
-      mkdir -p $ATMDIR
-      mkdir -p $SFCDIR
+      #mkdir -p $MASTER
+      mkdir -p $GB0p125
+      #mkdir -p $ATMDIR
+      #mkdir -p $SFCDIR
    fi
 
+################  C O P Y   F I L E S  ########################################
    if [[ $copy_files == "YES" && $debug == "NO" ]]; then # these get moved at a later step
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH}  ./$MASTER/. & ; job1=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p25.f${FH} ./$GB0p25/. & ; job2=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio  ./$ATMDIR/. & ; job3=$!
-      cp -p ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio  ./$SFCDIR/. & ; job4=$!
-      wait $job1 $job2 $job4 #don't wait on the nemsio atm file
+
+      if [[ $fortfile == "YES" && $valtime -eq ${PDY0}${CYC} ]]; then #not sure if this is right 
+         cd $ARCDIR/$PATHx/..
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gfs/*gfsanal*/fort.209   ./gfs.fort.209
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gfs/*gfsanal*/diag_conv_anl.${PDY0}${CYC}.gz ./gfs.diag_conv_anl.${PDY0}${CYC}.gz
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gfs/*gfsanal*/diag_conv_ges.${PDY0}${CYC}.gz ./gfs.diag_conv_ges.${PDY0}${CYC}.gz
+
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gdas/*gdasanal*/fort.209 ./gdas.fort.209
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gdas/*gdasanal*/diag_conv_anl.${PDY0}${CYC}.gz ./gdas.diag_conv_anl.${PDY0}${CYC}.gz
+         rsync -t $STMP/RUNDIRS/$PSLOT/${PDY0}${CYC}/gdas/*gdasanal*/diag_conv_ges.${PDY0}${CYC}.gz ./gdas.diag_conv_ges.${PDY0}${CYC}.gz
+         fortfile="NO"
+      fi
+
+      cd $ARCDIR/$PATHx
+      #rsync -t ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.master.grb2f${FH} ./$MASTER/. & ; job1=$!
+      rsync -t ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.pgrb2.0p125.f${FH} ./$GB0p125/. & ; job2=$!
+      #rsync -t ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.atmf${FH}.nemsio  ./$ATMDIR/. & ; job3=$!
+      #rsync -t ${ROTDIR}/gfs.$PDY0/$CYC/gfs.t${CYC}z.sfcf${FH}.nemsio  ./$SFCDIR/. & ; job4=$!
+      wait $job2
    fi
+
+################  A R C H I V E   F I L E S  ########################################
    if [[ $archive_files == "YES" ]]; then #now sort the data into respective dirs 
 
+      if [[ $fortfile == "YES" && $valtime -eq ${PDY0}${CYC} ]]; then #not sure if this is right 
+         cd $ARCDIR/$PATHx/..
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P  gfs.fort.209"
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P  gfs.diag_conv_anl.${PDY0}${CYC}.gz"
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P  gfs.diag_conv_ges.${PDY0}${CYC}.gz"
+
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P gdas.fort.209"
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P gdas.diag_conv_anl.${PDY0}${CYC}.gz "
+         hsi "cd $ATARDIR1/$PATHx/..; cput -P gdas.diag_conv_ges.${PDY0}${CYC}.gz "
+         fortfile="NO"
+      fi
+
       pids=""
 
-      cd $ARCDIR/$PATHx/$MASTER
-      hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &
-      pids+=" $!"
+      #cd $ARCDIR/$PATHx/$MASTER
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $MASTER/gfs.t${CYC}z.master.grb2f${FH}"  &; job=$!
+      #pids+=" $job"; echo "master: $job"
 
-      cd $ARCDIR/$PATHx/$GB0p25
-      hsi "cd $ATARDIR1/$PATHx; cput -P $GB0p25/gfs.t${CYC}z.pgrb2b.0p25.f${FH}" &
-      pids+=" $!"
+      cd $ARCDIR/$PATHx/$GB0p125
+      hsi "cd $ATARDIR1/$PATHx; cput -P $GB0p125/gfs.t${CYC}z.pgrb2.0p125.f${FH}" &; job=$!
+      pids+=" $job"; echo "0p125 job id: $job"
 
-      cd $ARCDIR/$PATHx/$ATMDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &
-      pids2+=" $!"
+      #cd $ARCDIR/$PATHx/$ATMDIR
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $ATMDIR/gfs.t${CYC}z.atmf${FH}.nemsio"   &; job=$!
+      #pids2+=" $job"; echo "atm job id: $job"
 
-      cd $ARCDIR/$PATHx/$SFCDIR
-      hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &
-      pids+=" $!"
+      #cd $ARCDIR/$PATHx/$SFCDIR
+      #hsi "cd $ATARDIR1/$PATHx; cput -P $SFCDIR/gfs.t${CYC}z.sfcf${FH}.nemsio"   &; job=$!
+      #pids+=" $job"; echo "sfc job id: $job"
 
-      for p in $pids; do
-         if wait $p; then
-            echo "Process $p success"
-            (( status=status+0 ))
-         else
-            echo "Process $p fail"
-            (( status=status+1 ))
-         fi
-      done
+      wait4jobs $pids
       pids=""
- 
+
    fi
    (( FH=FH+1 ))
 done
-
-if [[ $archive_files == "YES" && $cleanup == "YES" ]]; then
-   for p2 in $pids2; do
-      if wait $p2; then
-         echo "Process $p2 success"
-         (( status=status+0 ))
-      else
-         echo "Process $p2 fail"
-         (( status=status+1 ))
-      fi
-   done
-   #cleanup step
-   if [[ $status -eq 0 ]]; then
-      #echo "rm -rf $ROTDIR/gfs.$PDY0/$CYC"  #area where experiment runs
-      #echo "rm -rf $ARCDIR/$PATHx"          #archive temp dir for sorting data
-      rm -rf $ROTDIR/gfs.$PDY0/$CYC  #area where experiment runs
-      rm -rf $ARCDIR/$PATHx          #archive temp dir for sorting data
-   fi
-fi
 
 exit $status
 echo "Successfully completed"

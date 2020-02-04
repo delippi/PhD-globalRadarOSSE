@@ -1,9 +1,10 @@
-#!/bin/ksh
-set -x
+#!/bin/ksh -x
 set -e
 
 export ndate=/gpfs/hps2/u/Donald.E.Lippi/bin/ndate
 
+#pdy=20180923 #forecast pdy (begninning date)
+#cyc=00       #forecast cycle
 pdy=$PDY
 cyc=$cyc
 FHMAX=168  #length of forecast in hours
@@ -21,8 +22,8 @@ offset=0
 #The next two lines are meant to break the task of copying files to a temp dir
 #and then archiving them since there is so much data and the wall time will
 #likely be >6hrs
-copy_files="NO"
-archive_files="YES"
+copy_files="YES"
+archive_files="NO"
 
 if [[ $copy_files == "YES" && $archive_files == "NO"  ]]; then; copyarch="copy";    fi
 if [[ $copy_files == "NO"  && $archive_files == "YES" ]]; then; copyarch="archive"; fi
@@ -67,17 +68,7 @@ for p in $pids; do
       (( status=status+1 ))
    fi
 done
-
 if [[ $status -ne 0 ]]; then; exit $status; fi
-
-if [[ $status -eq 0 ]]; then
-   PSLOT=NEXRAD-2018092300-2018100700
-   ROTDIR="/gpfs/hps2/ptmp/Donald.E.Lippi/fv3gfs_dl2rw/2018092300/$PSLOT"
-   cd $ROTDIR/gfs.$pdy/$cyc  #move to the dir
-   rm -f gfs* 
-   echo "success" > ./NEXRAD-${pdy}${cyc}.success #write success file to start met jobs
-   cd - #move back to where we were before.
-fi
-
 echo "Successfully completed"
+
 exit $status
